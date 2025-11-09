@@ -1,1 +1,122 @@
-print ("hello" , "world")
+#include <cctype>
+#include <iostream>
+#include <string>
+using namespace std;
+
+const int MAX_SEMESTERS = 8;
+const int MAX_SUBJECTS = 10;
+
+string toUpperCase(string input) {
+    for (int i = 0; i < input.length(); i++) {
+        if (input[i] >= 'a' && input[i] <= 'z') {
+            input[i] = input[i] - 'a' + 'A';
+        }
+    }
+    return input;
+}
+
+string trim(string input) {
+    int start = 0;
+    while (start < input.length() && input[start] == ' ') start++;
+    int end = input.length() - 1;
+    while (end >= 0 && input[end] == ' ') end--;
+    if (start > end) return "";
+    return input.substr(start, end - start + 1);
+}
+
+double letterToGPA(string grade) {
+    grade = toUpperCase(trim(grade));
+    if (grade == "A") return 4.0;
+    else if (grade == "A-") return 3.7;
+    else if (grade == "B+") return 3.3;
+    else if (grade == "B") return 3.0;
+    else if (grade == "B-") return 2.7;
+    else if (grade == "C+") return 2.3;
+    else if (grade == "C") return 2.0;
+    else if (grade == "C-") return 1.7;
+    else if (grade == "D") return 1.0;
+    else return 0.0;
+}
+
+string gpaToLetter(double gpa) {
+    if (gpa >= 3.7) return "A";
+    else if (gpa >= 3.3) return "A-";
+    else if (gpa >= 3.0) return "B+";
+    else if (gpa >= 2.7) return "B";
+    else if (gpa >= 2.3) return "B-";
+    else if (gpa >= 2.0) return "C+";
+    else if (gpa >= 1.7) return "C";
+    else if (gpa >= 1.0) return "D";
+    else return "F";
+}
+
+int getValidInt(string prompt, int min, int max) {
+    int value;
+    while (true) {
+        cout << prompt;
+        cin >> value;
+        if (!cin.fail() && value >= min && value <= max) break;
+        cout << "Invalid input! Try again.\n";
+        cin.clear();
+        cin.ignore(1000, '\n');
+    }
+    return value;
+}
+
+int main() {
+    int semesters = getValidInt("Enter number of semesters (1 to 8): ", 1, MAX_SEMESTERS);
+
+    double allSemesterGPAs[MAX_SEMESTERS];
+    int allSemesterHours[MAX_SEMESTERS];
+    int subjectCount[MAX_SEMESTERS];
+
+    double totalPoints = 0;
+    int totalCredits = 0;
+
+    for (int s = 0; s < semesters; s++) {
+        cout << "\n--- Semester " << (s + 1) << " ---\n";
+        int subjects = getValidInt("Enter number of subjects: ", 1, MAX_SUBJECTS);
+        subjectCount[s] = subjects;
+
+        double semPoints = 0;
+        int semCredits = 0;
+
+        for (int j = 0; j < subjects; j++) {
+            string grade;
+            int credits;
+            cout << "Subject " << (j + 1) << " grade (A, B+, etc.): ";
+            cin >> ws;
+            getline(cin, grade);
+            credits = getValidInt("Credit hours: ", 1, 12);
+
+            double point = letterToGPA(grade);
+            semPoints += point * credits;
+            semCredits += credits;
+        }
+
+        double semGPA = semPoints / semCredits;
+        allSemesterGPAs[s] = semGPA;
+        allSemesterHours[s] = semCredits;
+
+        cout << "Semester GPA: " << semGPA << " (" << gpaToLetter(semGPA) << ")\n";
+
+        totalPoints += semPoints;
+        totalCredits += semCredits;
+    }
+
+    double finalGPA = totalPoints / totalCredits;
+
+    cout << "\n==== Final Summary ====\n";
+    for (int i = 0; i < semesters; i++) {
+        cout << "Semester " << (i + 1);
+        cout << ": GPA = " << allSemesterGPAs[i];
+        cout << " (" << gpaToLetter(allSemesterGPAs[i]) << ")";
+        cout << ", Credit Hours = " << allSemesterHours[i];
+        cout << ", Subjects = " << subjectCount[i] << "\n";
+    }
+
+    cout << "Cumulative GPA: " << finalGPA << " (" << gpaToLetter(finalGPA) << ")\n";
+    cout << "\nThank you for using the GPA calculator!\n";
+    return 0;
+
+}
